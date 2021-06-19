@@ -1,21 +1,21 @@
-// select canvas element
+// seleccionar elemento de lienzo
 const canvas = document.getElementById("pong");
 
-// getContext of canvas = methods and properties to draw and do a lot of thing to the canvas
+// getContext of canvas = métodos y propiedades para dibujar y hacer muchas cosas en el lienzo
 const ctx = canvas.getContext('2d');
 
-// load sounds
+// cargar sonidos
 let hit = new Audio();
 let wall = new Audio();
 let userScore = new Audio();
 let comScore = new Audio();
 
-hit.src = "sounds/hit.mp3";
-wall.src = "sounds/wall.mp3";
-comScore.src = "sounds/comScore.mp3";
-userScore.src = "sounds/userScore.mp3";
+hit.src = "sonido/comienzo.mp3";
+wall.src = "sonido/rebote.mp3";
+comScore.src = "sonido/perdida.mp3";
+userScore.src = "sonido/partida.mp3";
 
-// Ball object
+// Objeto de bola
 const ball = {
     x : canvas.width/2,
     y : canvas.height/2,
@@ -26,20 +26,20 @@ const ball = {
     color : "WHITE"
 }
 
-// User Paddle
+// Paleta de usuario
 const user = {
-    x : 0, // left side of canvas
-    y : (canvas.height - 100)/2, // -100 the height of paddle
+    x : 0, // lado izquierdo del lienzo
+    y : (canvas.height - 100)/2, // -100 la altura de la paleta
     width : 10,
     height : 100,
     score : 0,
     color : "WHITE"
 }
 
-// COM Paddle
+// Paleta COM
 const com = {
-    x : canvas.width - 10, // - width of paddle
-    y : (canvas.height - 100)/2, // -100 the height of paddle
+    x : canvas.width - 10, // - ancho de la paleta
+    y : (canvas.height - 100)/2, // -100 la altura de la paleta
     width : 10,
     height : 100,
     score : 0,
@@ -55,13 +55,13 @@ const net = {
     color : "WHITE"
 }
 
-// draw a rectangle, will be used to draw paddles
+// dibujar un rectángulo, se usará para dibujar paletas
 function drawRect(x, y, w, h, color){
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
 }
 
-// draw circle, will be used to draw the ball
+// dibujar círculo, se utilizará para dibujar la bola
 function drawArc(x, y, r, color){
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -70,7 +70,7 @@ function drawArc(x, y, r, color){
     ctx.fill();
 }
 
-// listening to the mouse
+// escuchando el raton
 canvas.addEventListener("mousemove", getMousePos);
 
 function getMousePos(evt){
@@ -79,7 +79,7 @@ function getMousePos(evt){
     user.y = evt.clientY - rect.top - user.height/2;
 }
 
-// when COM or USER scores, we reset the ball
+// cuando COM o USER marca, reiniciamos la pelota
 function resetBall(){
     ball.x = canvas.width/2;
     ball.y = canvas.height/2;
@@ -87,21 +87,21 @@ function resetBall(){
     ball.speed = 7;
 }
 
-// draw the net
+// dibujar la red
 function drawNet(){
     for(let i = 0; i <= canvas.height; i+=15){
         drawRect(net.x, net.y + i, net.width, net.height, net.color);
     }
 }
 
-// draw text
+// dibujar texto
 function drawText(text,x,y){
     ctx.fillStyle = "#FFF";
     ctx.font = "75px fantasy";
     ctx.fillText(text, x, y);
 }
 
-// collision detection
+// detección de colisiones
 function collision(b,p){
     p.top = p.y;
     p.bottom = p.y + p.height;
@@ -116,10 +116,10 @@ function collision(b,p){
     return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
 }
 
-// update function, the function that does all calculations
+// función de actualización, la función que hace todos los cálculos
 function update(){
     
-    // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
+    // cambiar el puntaje de los jugadores, si la pelota va a la izquierda "ball.x <0" computadora gana, de lo contrario si "ball.x> canvas.width" el usuario gana
     if( ball.x - ball.radius < 0 ){
         com.score++;
         comScore.play();
@@ -130,80 +130,80 @@ function update(){
         resetBall();
     }
     
-    // the ball has a velocity
+    // la pelota tiene una velocidad
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
     
-    // computer plays for itself, and we must be able to beat it
-    // simple AI
+    // la computadora juega por sí misma, y ​​debemos ser capaces de vencerla
+    // IA simple
     com.y += ((ball.y - (com.y + com.height/2)))*0.1;
     
-    // when the ball collides with bottom and top walls we inverse the y velocity.
+    // cuando la bola choca con las paredes superior e inferior, invertimos la velocidad y.
     if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
     
-    // we check if the paddle hit the user or the com paddle
+    // comprobamos si la paleta golpea al usuario o la paleta com
     let player = (ball.x + ball.radius < canvas.width/2) ? user : com;
     
-    // if the ball hits a paddle
+    // si la pelota golpea una paleta
     if(collision(ball,player)){
         // play sound
         hit.play();
-        // we check where the ball hits the paddle
+        // comprobamos donde la pelota golpea la paleta
         let collidePoint = (ball.y - (player.y + player.height/2));
-        // normalize the value of collidePoint, we need to get numbers between -1 and 1.
-        // -player.height/2 < collide Point < player.height/2
+        // normalizar el valor de collidePoint, necesitamos obtener números entre -1 y 1.
+        // -player.height / 2 <collide Point <player.height / 2
         collidePoint = collidePoint / (player.height/2);
         
-        // when the ball hits the top of a paddle we want the ball, to take a -45degees angle
-        // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
-        // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
-        // Math.PI/4 = 45degrees
+        // cuando la pelota golpea la parte superior de una paleta, queremos que la pelota tome un ángulo de -45 grados
+        // cuando la pelota golpea el centro de la paleta, queremos que la pelota tome un ángulo de 0 grados
+        // cuando la pelota golpea la parte inferior de la paleta, queremos que la pelota tome 45 grados
+        // Math.PI / 4 = 45 grados
         let angleRad = (Math.PI/4) * collidePoint;
         
-        // change the X and Y velocity direction
+        // cambiar la dirección de la velocidad X e Y
         let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
         ball.velocityX = direction * ball.speed * Math.cos(angleRad);
         ball.velocityY = ball.speed * Math.sin(angleRad);
         
-        // speed up the ball everytime a paddle hits it.
+        // acelera la pelota cada vez que una paleta la golpea.
         ball.speed += 0.1;
     }
 }
 
-// render function, the function that does al the drawing
+// función de render, la función que hace todo el dibujo
 function render(){
     
-    // clear the canvas
+    // limpiar el lienzo
     drawRect(0, 0, canvas.width, canvas.height, "#000");
     
-    // draw the user score to the left
+    // dibuja la puntuación del usuario a la izquierda
     drawText(user.score,canvas.width/4,canvas.height/5);
     
-    // draw the COM score to the right
+    // dibuja la puntuación COM a la derecha
     drawText(com.score,3*canvas.width/4,canvas.height/5);
     
-    // draw the net
+    // dibujar la red
     drawNet();
     
-    // draw the user's paddle
+    // dibujar la paleta del usuario
     drawRect(user.x, user.y, user.width, user.height, user.color);
     
-    // draw the COM's paddle
+    // dibujar la paleta de la COM
     drawRect(com.x, com.y, com.width, com.height, com.color);
     
-    // draw the ball
+    // sacar la pelota
     drawArc(ball.x, ball.y, ball.radius, ball.color);
 }
 function game(){
     update();
     render();
 }
-// number of frames per second
+// número de fotogramas por segundo
 let framePerSecond = 50;
 
-//call the game function 50 times every 1 Sec
+//llamar a la función del juego 50 veces cada 1 segundo
 let loop = setInterval(game,1000/framePerSecond);
 
